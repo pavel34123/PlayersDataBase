@@ -14,9 +14,11 @@ namespace новый
             const string CommandShowPlayers = "5";
             const string CommandExit = "6";
 
+            //ConsoleUtils.ReadInt("Введите крокодилов: ");
+
             DataBaseController controller = new DataBaseController();
 
-            Player player = new Player();
+
 
             bool isWorking = true;
 
@@ -36,9 +38,10 @@ namespace новый
                 switch (userInput)
                 {
                     case CommandAddPlayers:
-                        controller.AddPlayer();
+
                         break;
                     case CommandDeletePlayers:
+                        controller.DeletePlayer();
                         break;
                     case CommandBanPlayers:
                         break;
@@ -54,7 +57,6 @@ namespace новый
                         break;
                 }
 
-                Player player = new Player(controller.AddPlayer(player));
             }
         }
     }
@@ -73,28 +75,37 @@ namespace новый
             _players.Add(_indexCounter, player);
         }
 
-        public void DeletePlayer(int playerId)
+        public bool TryDeletePlayer(int playerId)
         {
             if (_players.ContainsKey(playerId))
             {
                 _players.Remove(playerId);
+                return true;
             }
+
+            return false;
         }
 
-        public void Ban(int playerId)
+        public bool TryBan(int playerId)
         {
             if (_players.ContainsKey(playerId))
             {
                 _players[playerId].Ban();
+                return true;
             }
+
+            return false;
         }
 
-        public void Unban(int playerId)
+        public bool TryUnban(int playerId)
         {
             if (_players.ContainsKey(playerId))
             {
                 _players[playerId].Unban();
+                return true;
             }
+
+            return false;
         }
     }
 
@@ -115,7 +126,7 @@ namespace новый
             }
         }
 
-        public void AddPlayer(Player player)
+        public void AddPlayer()
         {
             string name;
             int number;
@@ -136,7 +147,7 @@ namespace новый
             _dataBase.AddPlayer(players);
         }
 
-        public void DeletePlayer(Player player)
+        public void DeletePlayer()
         {
             int userInput;
             int indexPlayer = 0;
@@ -150,9 +161,16 @@ namespace новый
 
             } while (indexPlayer != userInput);
 
-            _dataBase.DeletePlayer(userInput);
+            if (_dataBase.TryDeletePlayer(userInput))
+            {
+                Console.WriteLine("Игрок удален");
 
-            Console.WriteLine("Игрок удален");
+            }
+            else
+            {
+                Console.WriteLine("Игрок не удален");
+            }
+
 
         }
 
@@ -167,7 +185,7 @@ namespace новый
             if (specifyStatus)
             {
                 Console.WriteLine("Игрок забанен");
-                _dataBase.Ban(playerIndex);
+                _dataBase.TryBan(playerIndex);
             }
             else
             {
@@ -186,7 +204,7 @@ namespace новый
             if (specifyStatus)
             {
                 Console.WriteLine("Игрок разбанен");
-                _dataBase.Unban(playerIndex);
+                _dataBase.TryUnban(playerIndex);
             }
             else
             {
@@ -227,5 +245,30 @@ public class Player
     public void Unban()
     {
         _isBanned = false;
+    }
+}
+
+public static class ConsoleUtils
+{
+    public static int ReadInt(string message = "Введите целое число: ")
+    {
+        int result;
+        bool success;
+
+        do
+        {
+            Console.WriteLine(message);
+            string userInput = Console.ReadLine();
+
+            success = int.TryParse(userInput, out result);
+
+            if (success == false)
+            {
+                Console.WriteLine("Неудача. Ожидалось целое число, попробуйте ещё раз");
+            }
+
+        } while (success == false);
+
+        return result;
     }
 }
